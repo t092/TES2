@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星際合成塔防 EX 終極版</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+    <div id="app-wrapper">
+        <!-- 全螢幕覆蓋層（獨立於 canvas，跟隨視窗縮放） -->
+        <div id="home-screen">
+            <div class="stars-bg"></div>
+            <div class="home-content">
+                <h1 class="game-title">星際防衛前線</h1>
+                <div class="subtitle">STAR DEFENSE FRONTLINE</div>
+
+                <!-- 跑馬燈訊息欄（全域金幣 + 戰術指引，水平輪播） -->
+                <div class="marquee-bar">
+                    <div class="marquee-track">
+                        <div class="marquee-content">
+                            <span class="mrq-bank">✦ 全域星際幣: $<span class="bank-value">0</span></span>
+                            <span class="mrq-sep">┃</span>
+                            <span>戰術指引：將同等級的塔合成以獲取強大火力！</span>
+                            <span class="mrq-sep">┃</span>
+                            <span class="mrq-key">P 暫停</span>
+                            <span class="mrq-key">F 全螢幕</span>
+                            <span class="mrq-key">M 合成</span>
+                            <span class="mrq-key">Del 拆除</span>
+                            <span class="mrq-sep">┃</span>
+                            <span>擊殺 BOSS 可解鎖更高階合成等級</span>
+                        </div>
+                        <div class="marquee-content">
+                            <span class="mrq-bank">✦ 全域星際幣: $<span class="bank-value">0</span></span>
+                            <span class="mrq-sep">┃</span>
+                            <span>戰術指引：將同等級的塔合成以獲取強大火力！</span>
+                            <span class="mrq-sep">┃</span>
+                            <span class="mrq-key">P 暫停</span>
+                            <span class="mrq-key">F 全螢幕</span>
+                            <span class="mrq-key">M 合成</span>
+                            <span class="mrq-key">Del 拆除</span>
+                            <span class="mrq-sep">┃</span>
+                            <span>擊殺 BOSS 可解鎖更高階合成等級</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mode-container">
+                    <div class="mode-card" onclick="startGame('infinite')">
+                        <div class="card-glow"></div>
+                        <div class="card-icon">♾️</div>
+                        <h2>無限防禦</h2>
+                        <p>開局配備基礎塔，迎接無窮無盡、能力各異的怪物與首領！</p>
+                        <p class="card-bonus">結算資金 100% 存入銀行</p>
+                        <button class="start-btn cyan">部署前線</button>
+                    </div>
+                    <div class="mode-card" onclick="startGame('campaign')">
+                        <div class="card-glow"></div>
+                        <div class="card-icon">🏆</div>
+                        <h2>戰役模式</h2>
+                        <p>100 波終極考驗！每擊殺 10 隻 BOSS 解鎖全新科技塔防！</p>
+                        <p class="card-bonus">提領全域銀行資金作為開局優勢</p>
+                        <button class="start-btn teal">展開遠征</button>
+                    </div>
+                    <div class="mode-card" onclick="openShop()">
+                        <div class="card-glow"></div>
+                        <div class="card-icon">🛒</div>
+                        <h2>科技商店</h2>
+                        <p>使用全域星際幣購買永久特權防禦塔！所有模式皆可直接使用。</p>
+                        <p class="card-bonus">永久解鎖強力塔種</p>
+                        <button class="start-btn gold">進入商店</button>
+                    </div>
+                    <div class="mode-card" onclick="document.getElementById('map-file-input').click()">
+                        <div class="card-glow"></div>
+                        <div class="card-icon">🗺️</div>
+                        <h2>載入地圖</h2>
+                        <p>載入由地圖編輯器製作的 .json 地圖檔案，體驗自訂關卡！</p>
+                        <p class="card-bonus" id="loaded-map-name">未選擇地圖</p>
+                        <button class="start-btn cyan">選擇地圖檔案</button>
+                        <input type="file" id="map-file-input" accept=".json" style="display:none">
+                    </div>
+                    <div class="mode-card" onclick="window.open('map-editor.html', '_blank')">
+                        <div class="card-glow"></div>
+                        <div class="card-icon">🎨</div>
+                        <h2>地圖編輯器</h2>
+                        <p>使用遊戲素材設計自訂關卡！支援 tile 筆刷、路徑編輯、即時預覽。</p>
+                        <p class="card-bonus">拖放直覺設計，匯出 JSON 即可在主程式遊玩</p>
+                        <button class="start-btn teal">開啟編輯器</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商店畫面 -->
+        <div id="shop-screen">
+            <div class="stars-bg"></div>
+            <button class="close-shop-btn" onclick="closeShop()">✕ 返回</button>
+            <h1 class="shop-title">星際黑市科技</h1>
+            <div class="global-bank">持有星際幣: $<span id="shop-bank-display">0</span></div>
+            <div class="shop-grid" id="shop-grid"></div>
+            <div id="shop-error"></div>
+        </div>
+
+        <!-- 遊戲結束畫面 -->
+        <div id="overlay-screen" style="display: none;">
+            <div class="stars-bg"></div>
+            <h1 id="overlay-title">任務結束</h1>
+            <div id="overlay-desc" class="tutorial-text"></div>
+            <button class="start-btn cyan" onclick="returnToHome()" style="width: auto; padding: 12px 40px;">返回母艦</button>
+        </div>
+
+        <div id="game-container">
+            <div id="canvas-area">
+                <canvas id="gameCanvas" width="1024" height="576"></canvas>
+                <div id="toast" class="toast">訊息</div>
+
+                <div id="ui-layer">
+                    <!-- 遊戲內 UI（在 canvas 內的疊層） -->
+                    <div id="game-ui" style="display: none;">
+                        <button id="next-wave-btn" class="btn-style" onclick="startNextWave()">下一波 (SPACE)</button>
+                        <div id="merge-hint">✨ 已選取：點擊另一個同等級塔進行合成 ✨</div>
+                        <div id="warp-overlay"></div>
+                        <div id="scaling-info">敵軍強度: x1.0 | 等級上限: Lv.5</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 快速列 -->
+            <div id="quick-bar" style="display: none;">
+                <div id="quick-towers"></div>
+                <button class="quick-btn speed-btn" id="speed-up-btn" onclick="speedUp()">⏩ x2</button>
+                <button class="quick-btn speed-btn active" id="speed-normal-btn" onclick="setSpeedNormal()">1x</button>
+                <button class="quick-btn speed-btn" id="speed-pause-btn" onclick="togglePause()">⏸️ 暫停</button>
+                <button class="quick-btn" id="quick-automerge" onclick="autoMerge()">🔄 合成</button>
+                <button class="quick-btn" id="quick-shop" onclick="toggleShop()">🛒 商店</button>
+            </div>
+        </div>
+
+        <!-- 右側 UI 面板 -->
+        <div id="ui-panel" style="display: none;">
+            <div class="panel-info">
+                <div class="stat-item">💰 資金: <span id="money-display">0</span></div>
+                <div class="stat-item">🏰 基地: <span id="lives-display" style="color:#66fcf1">10000</span> HP</div>
+                <div class="stat-item">🌊 波數: <span id="wave-display">0</span> <span id="mode-display-text" style="color:#fff; font-size:0.8em;"></span></div>
+                <div class="stat-item">👹 Boss擊殺: <span id="boss-kill-display">0</span></div>
+                <div class="stat-item">🏠 塔數: <span id="tower-count-display">0</span>/<span id="tower-max-display">10</span></div>
+            </div>
+
+            <div class="panel-controls">
+                <button class="panel-btn" id="pause-btn" onclick="togglePause()">⏸️ 暫停</button>
+                <button class="panel-btn" id="automerge-btn" onclick="autoMerge()">🔄 一鍵合成</button>
+                <button class="panel-btn" id="ingame-shop-btn" onclick="toggleShop()">🛒 商店</button>
+                <button class="panel-btn" id="mute-btn" onclick="soundManager.toggleMute()">🔊</button>
+                <button class="panel-btn" id="fullscreen-btn" onclick="toggleFullScreen()">⛶ 全螢幕</button>
+                <button class="panel-btn" onclick="document.getElementById('ingame-map-input').click()">🗺️ 換地圖</button>
+                <input type="file" id="ingame-map-input" accept=".json" style="display:none">
+                <button id="sell-btn" class="panel-btn sell-btn" onclick="sellSelectedTower()">🗑️ 販賣 ($0)</button>
+            </div>
+
+            <div class="panel-towers">
+                <div class="control-bar" id="tower-controls"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模組化腳本載入（順序重要） -->
+    <script src="js/constants.js"></script>
+    <script src="js/sound.js"></script>
+    <script src="js/graphics.js"></script>
+    <script src="js/effects.js"></script>
+    <script src="js/entities.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
